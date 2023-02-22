@@ -158,14 +158,7 @@ console.timeEnd();
 
 
 
-class Node {
-  constructor(key, value) {
-    this.key = key;
-    this.value = value;
-    this.left = null;
-    this.right = null;
-  }
-}
+
 
 class HashTableJSON {
   constructor(size) {
@@ -238,66 +231,169 @@ class HashTableJSON {
     return null;
   }
 }
-class HashTableJSON2 {
+
+
+
+
+
+
+
+class Node {
+  constructor(key, value) {
+    this.key = key;
+    this.value = value;
+    this.left = null;
+    this.right = null;
+  }
+}
+class BinarySearchTree {
   constructor() {
     this.root = null;
   }
-  _hash(key) {
-    const salt = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    const hashedKey = SHA256(key + salt).toString();
-    return hashedKey % this.size;
-  }
+
   insert(key, value) {
-    const hash = this._hash(key);
     const newNode = new Node(key, value);
+
     if (!this.root) {
       this.root = newNode;
       return;
     }
 
-    let current = this.root;
-    while (current) {
-      if (hash < this._hash(current.key)) {
-        if (!current.left) {
-          current.left = new Node(key,value);
-          break;
+    let currentNode = this.root;
+
+    while (currentNode) {
+      if (this._compareKeys(key, currentNode.key) < 0) {
+        if (!currentNode.left) {
+          currentNode.left = newNode;
+          return;
         }
-        current = current.left;
-      } else if (hash > this._hash(current.key)) {
-        if (!current.right) {
-          current.right = new Node(key,value);
-          break;
+        currentNode = currentNode.left;
+      } else if (this._compareKeys(key, currentNode.key) > 0) {
+        if (!currentNode.right) {
+          currentNode.right = newNode;
+          return;
         }
-        current = current.right;
+        currentNode = currentNode.right;
       } else {
         // key already exists, update the value
-        current.value = value;
-        break;
+        currentNode.value = value;
+        return;
       }
     }
   }
-  searchByName(name) {
-    const hash = this._hash(name);
-    let current = this.root;
-    while (current) {
-      console.log(current);
-      if (hash < this._hash(current.key)) {
-        current = current.left;
-        console.log(current);
-      } else if (hash > this._hash(current.key)) {
-        current = current.right;
-        console.log(current);
-      } else if (current.key === name) {
-        console.log(current.key);
-        return current.value;
+
+  _compareKeys(key1, key2) {
+    const name1 = key1.name;
+    const name2 = key2.name;
+    if (name1 < name2) {
+      return -1;
+    } else if (name1 > name2) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+  search(key) {
+    let currentNode = this.root;
+    while (currentNode) {
+      // console.log(currentNode);
+      if (this._compareKeys(key, currentNode.key) === 0) {
+        return currentNode;
+      } else if (this._compareKeys(key, currentNode.key) < 0) {
+        currentNode = currentNode.left;
       } else {
-        // key not found
-        break;
+        currentNode = currentNode.right;
       }
     }
     return null;
   }
-}  
+  
+}
+
+
+
+class HashTableJSON2 {
+  constructor(size = 32) {
+    this.size = size;
+    this.buckets = new Array(this.size);
+    this.count = 0; // Keep track of the number of elements
+    this.bst = new BinarySearchTree();
+  }
+
+  _hash(key) {
+    const salt = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const hashedKey = SHA256(key + salt).toString();
+    return hashedKey % this.size;
+  }
+
+  insert(key, value) {
+    const hash = this._hash(key);
+
+    if (!this.buckets[hash]) {
+      this.buckets[hash] = [];
+    }
+
+    // Check if the key already exists in the bucket
+    const index = this.buckets[hash].findIndex(([k, v]) => k === key);
+    if (index === -1) {
+      // Key does not exist, add it to the bucket
+      this.buckets[hash].push([key, value]);
+      this.count++;
+      this.bst.insert(key, value);
+    } else {
+      // Key already exists, update the value
+      this.buckets[hash][index][1] = value;
+    }
+
+    // Check if the load factor exceeds the threshold
+    if (this.count / this.size > 0.7) {
+      this.resize();
+    }
+  }
+
+  resize(newSize = this.size * 2) {
+    // Create a new array with the new size
+    const newBuckets = new Array(newSize);
+    const newBST = new BinarySearchTree();
+
+    // Rehash all elements and insert them into the new array
+    for (let bucket of this.buckets) {
+      if (bucket) {
+        for (let [key, value] of bucket) {
+          const hash = this._hash(key);
+
+          if (!newBuckets[hash]) {
+            newBuckets[hash] = [];
+          }
+
+          newBuckets[hash].push([key, value]);
+          newBST.insert(key, value);
+        }
+      }
+    }
+
+    this.buckets = newBuckets;
+    this.size = newSize;
+    this.bst = newBST;
+  }
+
+  searchByName(name) {
+    const node = this.bst.search({ name });
+
+    if (!node) {
+      return null;
+    }
+
+    const key = node.key;
+    const hash = this._hash(key);
+    const index = this.buckets[hash].findIndex(([k, v]) => k === key);
+    // console.log(this.buckets[hash][index]);
+    return this.buckets[hash][index][0];
+  }
+}
+
+
+
 
 const myHashTableJSON = new HashTableJSON(500);
 const myHashTableJSON2 = new HashTableJSON2(500);
