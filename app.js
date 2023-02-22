@@ -46,7 +46,7 @@ app.use(function(err, req, res, next) {
 
 
 
-
+//CONCEPT HASHTABLE*************************************************
 
 const { SHA256 } = require('crypto-js');
 
@@ -153,6 +153,7 @@ console.log(myHashTable.get('baz')); // Output: undefined
 console.log(myHashTable.get(42)); // Output: undefined
 console.log(myHashTable.get('David')); // Output: Number
 console.timeEnd();
+// Okay we got to build a quick proof of concept. Let's try something more advanced.
 
 
 
@@ -160,84 +161,14 @@ console.timeEnd();
 
 
 
-class HashTableJSON {
-  constructor(size) {
-    this.size = size;
-    this.data = new Array(size);
-  }
+//BINARY SEARCH HASHTABLE******************************************
 
-  // _hash(key) {
-  //   const hash = SHA256(key).toString();
-  //   const index = parseInt(hash, 16) % this.size;
-  //   return index;
-  // }
-  _hash(key) {
-    const salt = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    const hashedKey = SHA256(key + salt).toString();
-    return hashedKey % this.size;
-  }
-
-  set(key, value) {
-    let index = this._hash(key);
-    let step = 1;
-    while (this.data[index]) {
-      // Linear probing to the next available slot
-      index = (index + step) % this.data.length;
-      step++;
-    }
-    data[index] = [key, value];
-  }
-
-  get(key) {
-    let index = this._hash(key);
-    let step = 1;
-    while (this.data[index]) {
-      if (this.data[index][0] === key) {
-        return this.data[index][1];
-      }
-      // Linear probing to the next slot
-      index = (index + step) % this.data.length;
-      step++;
-    }
-    return undefined;
-  }
-  values() {
-    let valuesArr = [];
-    for (let i = 0; i < this.keyMap.length; i++) {
-      if (this.keyMap[i]) {
-        valuesArr.push(this.keyMap[i][1]);
-      }
-    }
-    return valuesArr;
-  }
-
-  entries() {
-    let entriesArr = [];
-    for (let i = 0; i < this.keyMap.length; i++) {
-      if (this.keyMap[i]) {
-        entriesArr.push(this.keyMap[i]);
-      }
-    }
-    return entriesArr;
-  }
-  searchByName(name) {
-    for (let i = 0; i < this.data.length; i++) {
-      // console.log(data[i]);
-      if (data[i] === undefined) continue;
-      if (data[i].name === name) {
-        return data[i];
-      }
-    }
-    return null;
-  }
-}
+//In the spirit of being useful-
+//Let's build a search that can access properties of an object in JSON, returning the whole object.
 
 
-
-
-
-
-
+//WE NEED DSA
+//LEt's build some nodes
 class Node {
   constructor(key, value) {
     this.key = key;
@@ -246,11 +177,14 @@ class Node {
     this.right = null;
   }
 }
+//And a binary tree to search with
 class BinarySearchTree {
   constructor() {
     this.root = null;
   }
-
+  //I wonder how fast this thing would get if I put
+  // that sick CB/Glide sorting algorithm from a few days ago in here... 
+  //Since you know, like a BST is way faster if the elements are pre-storted. Mayybe later.
   insert(key, value) {
     const newNode = new Node(key, value);
 
@@ -311,21 +245,21 @@ class BinarySearchTree {
 }
 
 
-
-class HashTableJSON2 {
+//Ok let's make a cool hash table that uses SHA-256 hashing algo
+class HashTable2 {
   constructor(size = 32) {
     this.size = size;
     this.buckets = new Array(this.size);
     this.count = 0; // Keep track of the number of elements
     this.bst = new BinarySearchTree();
   }
-
+  //we might have multiple names, lets get salty with it
   _hash(key) {
     const salt = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const hashedKey = SHA256(key + salt).toString();
     return hashedKey % this.size;
   }
-
+  //This took me way longer than it should have
   insert(key, value) {
     const hash = this._hash(key);
 
@@ -376,7 +310,7 @@ class HashTableJSON2 {
     this.size = newSize;
     this.bst = newBST;
   }
-
+  //now we search that BST we made. THE SPEED IS WORTH IT
   searchByName(name) {
     const node = this.bst.search({ name });
 
@@ -387,17 +321,16 @@ class HashTableJSON2 {
     const key = node.key;
     const hash = this._hash(key);
     const index = this.buckets[hash].findIndex(([k, v]) => k === key);
+    //This is important because WTF at this point
     // console.log(this.buckets[hash][index]);
-    return this.buckets[hash][index][0];
+    return this.buckets[hash][index][0]; //BOOM!!! WE GET OUR NAME
   }
 }
 
 
 
 
-const myHashTableJSON = new HashTableJSON(500);
-const myHashTableJSON2 = new HashTableJSON2(500);
-
+//We need to test this
 function generateRandomData() {
   const names = [
     'Emma', 'Liam', 'Olivia', 'Noah', 'Ava', 'Ethan', 'Sophia', 'Logan', 'Isabella', 'Lucas', 'Mia', 'Jackson', 'Charlotte',
@@ -416,32 +349,23 @@ function generateRandomData() {
   
   for (let i = 0; i < names.length; i++) {
     const name = names[i];
-    const age = Math.floor(Math.random() * 90) + 1; // generate random age between 1 and 100
+    const age = Math.floor(Math.random() * 90) + 1; // generate random age between 1 and 90
     data.push({ name, age });
   }
-
   return data;
 }
 
 const data = generateRandomData();
+const myHashTable2 = new HashTable2(200);
 
 data.forEach(item => {
-  myHashTableJSON.set(item, item.age);
+  myHashTable2.insert(item, item.age);
 });
-data.forEach(item => {
-  myHashTableJSON2.insert(item, item.age);
-});
- 
 
-// console.time();
-// console.log(myHashTableJSON.searchByName('Alyssa')); // Output: { name: 'Alyssa', age: 26 }
-
-// console.timeEnd();
+//It's ALIVE
 console.time();
-console.log(myHashTableJSON2.searchByName('Alyssa')); // Output: { name: 'Alyssa', age: 26 }
-
+console.log(myHashTable2.searchByName('Alyssa')); // Output: { name: 'Alyssa', age: 26 }
 console.timeEnd();
-// myHashTableJSON.delete({ name: 'Charlie', age: 35 });
 
 
 module.exports = app;
