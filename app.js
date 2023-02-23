@@ -166,98 +166,12 @@ console.timeEnd();
 //In the spirit of being useful-
 //Let's build a search that can access properties of an object in JSON, returning the whole object.
 
-
-//WE NEED DSA
-//Let's build some nodes
-class Node {
-  constructor(key, value) {
-    this.key = key;
-    this.value = value;
-    this.left = null;
-    this.right = null;
-  }
-}
-//And a binary tree to search with
-class BinarySearchTree {
-  constructor() {
-    this.root = null;
-  }
-  //I wonder how fast this thing would get if I put
-  // that sick CB/Glide sorting algorithm from a few days ago in here... 
-  //Since you know, like a BST is way faster if the elements are pre-storted. Mayybe later.
-  insert(key, value) {
-    const newNode = new Node(key, value);
-
-    if (!this.root) {
-      this.root = newNode;
-      return;
-    }
-
-    let currentNode = this.root;
-
-    while (currentNode) {
-      if (this._compareKeys(key, currentNode.key) < 0) {
-        if (!currentNode.left) {
-          currentNode.left = newNode;
-          return;
-        }
-        currentNode = currentNode.left;
-      } else if (this._compareKeys(key, currentNode.key) > 0) {
-        if (!currentNode.right) {
-          currentNode.right = newNode;
-          return;
-        }
-        currentNode = currentNode.right;
-      } else {
-        // key already exists, update the value
-        currentNode.value = value;
-        return;
-      }
-    }
-  }
-
-  _compareKeys(key1, key2) {
-    const name1 = key1.name;
-    const name2 = key2.name;
-    if (name1 < name2) {
-      return -1;
-    } else if (name1 > name2) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
-
-
-  searchAll(key) {
-    const nodes = [];
-    let currentNode = this.root;
-
-    while (currentNode) {
-      // console.log(currentNode.key);
-      if (this._compareKeys(key, currentNode.key) === 0) {
-        nodes.push(currentNode.key);
-        currentNode = currentNode.left; // keep searching for matches in the left subtree
-      } else if (this._compareKeys(key, currentNode.key) < 0) {
-        currentNode = currentNode.left;
-      } else {
-        currentNode = currentNode.right;
-      }
-    }
-
-    return nodes;
-  }
-  
-}
-
-
 //Ok let's make a cool hash table that uses SHA-256 hashing algo
 class HashTable2 {
   constructor(size = 32) {
     this.size = size;
     this.buckets = new Array(this.size);
     this.count = 0; // Keep track of the number of elements
-    this.bst = new BinarySearchTree();
   }
   //we might have multiple names, lets get salty with it
   _hash(key) {
@@ -279,7 +193,6 @@ class HashTable2 {
       // Key does not exist, add it to the bucket
       this.buckets[hash].push([key, value]);
       this.count++;
-      this.bst.insert(key, value);
     } else {
       // Key already exists, update the value
       this.buckets[hash][index][1] = value;
@@ -294,7 +207,6 @@ class HashTable2 {
   resize(newSize = this.size * 2) {
     // Create a new array with the new size
     const newBuckets = new Array(newSize);
-    const newBST = new BinarySearchTree();
 
     // Rehash all elements and insert them into the new array
     for (let bucket of this.buckets) {
@@ -307,14 +219,12 @@ class HashTable2 {
           }
 
           newBuckets[hash].push([key, value]);
-          newBST.insert(key, value);
         }
       }
     }
 
     this.buckets = newBuckets;
     this.size = newSize;
-    this.bst = newBST;
   }
   
   searchAll(name) {
@@ -387,7 +297,8 @@ data.forEach(item => {
 
 //It's ALIVE
 console.time();
-console.log(myHashTable2.searchAll('Alyssa')); // Output: { name: 'Alyssa', age: 26 }
+myHashTable2.searchAll('Alyssa');
+// console.log(myHashTable2.searchAll('Alyssa')); // Output: { name: 'Alyssa', age: 26 }
 console.timeEnd();
 
 
