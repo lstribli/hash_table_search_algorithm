@@ -168,7 +168,7 @@ console.timeEnd();
 
 
 //WE NEED DSA
-//LEt's build some nodes
+//Let's build some nodes
 class Node {
   constructor(key, value) {
     this.key = key;
@@ -227,19 +227,25 @@ class BinarySearchTree {
       return 0;
     }
   }
-  search(key) {
+
+
+  searchAll(key) {
+    const nodes = [];
     let currentNode = this.root;
+
     while (currentNode) {
-      // console.log(currentNode);
+      // console.log(currentNode.key);
       if (this._compareKeys(key, currentNode.key) === 0) {
-        return currentNode;
+        nodes.push(currentNode.key);
+        currentNode = currentNode.left; // keep searching for matches in the left subtree
       } else if (this._compareKeys(key, currentNode.key) < 0) {
         currentNode = currentNode.left;
       } else {
         currentNode = currentNode.right;
       }
     }
-    return null;
+
+    return nodes;
   }
   
 }
@@ -310,29 +316,45 @@ class HashTable2 {
     this.size = newSize;
     this.bst = newBST;
   }
-  //now we search that BST we made. THE SPEED IS WORTH IT
-  searchByName(name) {
-    const node = this.bst.search({ name });
-
-    if (!node) {
-      return null;
+  
+  searchAll(name) {
+    const nodes = [];
+    
+    // Search the primary hash table
+    const index = this._hash(name);
+    for (let node of this.buckets[index]) {
+      // console.log(node[0]);
+      if (node[0].name === name) {
+        nodes.push(node[0]);
+      }
     }
-
-    const key = node.key;
-    const hash = this._hash(key);
-    const index = this.buckets[hash].findIndex(([k, v]) => k === key);
-    //This is important because WTF at this point
-    // console.log(this.buckets[hash][index]);
-    return this.buckets[hash][index][0]; //BOOM!!! WE GET OUR NAME
+    return nodes;
   }
 }
-
-
-
 
 //We need to test this
 function generateRandomData() {
   const names = [
+    'Emma', 'Liam', 'Olivia', 'Noah', 'Ava', 'Ethan', 'Sophia', 'Logan', 'Isabella', 'Lucas', 'Mia', 'Jackson', 'Charlotte',
+    'Jacob', 'Amelia', 'William', 'Harper', 'Evelyn', 'Michael', 'Abigail', 'Benjamin', 'Emily', 'Alexander', 'Elizabeth',
+    'Ella', 'Daniel', 'Avery', 'Matthew', 'Sofia', 'Joseph', 'Madison', 'Oliver', 'Scarlett', 'Carter', 'Victoria',
+    'David', 'Aria', 'Isaac', 'Grace', 'Mason', 'Chloe', 'Samuel', 'Penelope', 'Sebastian', 'Riley', 'Henry', 'Lily',
+    'Owen', 'Eleanor', 'Gabriel', 'Hannah', 'Caleb', 'Aubrey', 'Connor', 'Addison', 'Levi', 'Natalie', 'Nicholas',
+    'Aaliyah', 'Isabelle', 'Grayson', 'Alyssa', 'Alyssa','Alyssa', 'Julian', 'Lila', 'Eli', 'Brooklyn', 'Ryan', 'Ellie', 'Luna', 'William',
+    'Stella', 'Jayden', 'Savannah', 'Christopher', 'Maya', 'Aiden', 'Skylar', 'Jonathan', 'Audrey', 'Ella', 'Leah',
+    'Nathan', 'Bella', 'Zoe', 'Eva', 'Aaron', 'Claire', 'Christian', 'Lucy', 'Adrian', 'Alice', 'Hazel', 'Caroline',
+    'Landon', 'Aurora', 'Thomas', 'Katherine', 'Robert', 'Kylie', 'Easton', 'Makayla', 'Grayson', 'Nova', 'Josiah',
+    'Ellie', 'Colton', 'Genesis', 'Brandon', 'Paisley', 'Evan', 'Naomi', 'Asher', 'Aaliyah', 'Jace', 'Georgia',
+    'Emma', 'Liam', 'Olivia', 'Noah', 'Ava', 'Ethan', 'Sophia', 'Logan', 'Isabella', 'Lucas', 'Mia', 'Jackson', 'Charlotte',
+    'Jacob', 'Amelia', 'William', 'Harper', 'Evelyn', 'Michael', 'Abigail', 'Benjamin', 'Emily', 'Alexander', 'Elizabeth',
+    'Ella', 'Daniel', 'Avery', 'Matthew', 'Sofia', 'Joseph', 'Madison', 'Oliver', 'Scarlett', 'Carter', 'Victoria',
+    'David', 'Aria', 'Isaac', 'Grace', 'Mason', 'Chloe', 'Samuel', 'Penelope', 'Sebastian', 'Riley', 'Henry', 'Lily',
+    'Owen', 'Eleanor', 'Gabriel', 'Hannah', 'Caleb', 'Aubrey', 'Connor', 'Addison', 'Levi', 'Natalie', 'Nicholas',
+    'Aaliyah', 'Isabelle', 'Grayson', 'Alyssa', 'Alyssa','Alyssa', 'Julian', 'Lila', 'Eli', 'Brooklyn', 'Ryan', 'Ellie', 'Luna', 'William',
+    'Stella', 'Jayden', 'Savannah', 'Christopher', 'Maya', 'Aiden', 'Skylar', 'Jonathan', 'Audrey', 'Ella', 'Leah',
+    'Nathan', 'Bella', 'Zoe', 'Eva', 'Aaron', 'Claire', 'Christian', 'Lucy', 'Adrian', 'Alice', 'Hazel', 'Caroline',
+    'Landon', 'Aurora', 'Thomas', 'Katherine', 'Robert', 'Kylie', 'Easton', 'Makayla', 'Grayson', 'Nova', 'Josiah',
+    'Ellie', 'Colton', 'Genesis', 'Brandon', 'Paisley', 'Evan', 'Naomi', 'Asher', 'Aaliyah', 'Jace', 'Georgia',
     'Emma', 'Liam', 'Olivia', 'Noah', 'Ava', 'Ethan', 'Sophia', 'Logan', 'Isabella', 'Lucas', 'Mia', 'Jackson', 'Charlotte',
     'Jacob', 'Amelia', 'William', 'Harper', 'Evelyn', 'Michael', 'Abigail', 'Benjamin', 'Emily', 'Alexander', 'Elizabeth',
     'Ella', 'Daniel', 'Avery', 'Matthew', 'Sofia', 'Joseph', 'Madison', 'Oliver', 'Scarlett', 'Carter', 'Victoria',
@@ -356,7 +378,8 @@ function generateRandomData() {
 }
 
 const data = generateRandomData();
-const myHashTable2 = new HashTable2(200);
+//***NEED A FUNCTION HERE TO AUTO-ALLOCATE TABLE SIZE BASED ON INPUT SIZE.  */
+const myHashTable2 = new HashTable2(700);
 
 data.forEach(item => {
   myHashTable2.insert(item, item.age);
@@ -364,7 +387,7 @@ data.forEach(item => {
 
 //It's ALIVE
 console.time();
-console.log(myHashTable2.searchByName('Alyssa')); // Output: { name: 'Alyssa', age: 26 }
+console.log(myHashTable2.searchAll('Alyssa')); // Output: { name: 'Alyssa', age: 26 }
 console.timeEnd();
 
 
